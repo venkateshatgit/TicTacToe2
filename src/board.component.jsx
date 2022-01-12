@@ -1,6 +1,6 @@
 import Square from "./square.component";
 
-function Board({squares,  onClick, xColor, oColor}) {
+function Board({squares, onClick, xColor, oColor}) {
   
     function renderSquare(rowIndex, i){
 

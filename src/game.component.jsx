@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import DropdownInput from "react";
 import Board from "./board.component";
 
 
 function Game() {
     const [rows, setRows] = useState(3)
-    const [matrix, setMatrix] = useState(Array.from(Array(rows), () => new Array(rows).fill(null)))
+    const [coloums, setColoums] = useState(3) 
+    const [matrix, setMatrix] = useState(Array.from(Array(rows), () => new Array(coloums).fill(null)))
     const [isXNext, setIsXNext] = useState(true)
     const [winner, setWinner] = useState("")
     const [play , setPlay] = useState(true);
@@ -14,19 +14,23 @@ function Game() {
     const [matMove, setMatMove] = useState(0);
     const [xColor, setXColor] = useState('#000000');
     const [oColor, setOColor] = useState('#000000');
+  
 
 
     useEffect(() => {
-        setMatrix(Array.from(Array(rows), () => new Array(rows).fill(null)))
+        setMatrix(Array.from(Array(rows), () => new Array(coloums).fill(null)))
+        setHistory([Array.from(Array(rows), () => new Array(coloums).fill(null))])
         matrixSetup()
-    }, [rows])
+        
+    }, [rows, coloums])
 
 
     const calculateWinner = (rowIndex, colIndex) => {
       let check = matrix[rowIndex][colIndex]
       let row = false, col = false, diagonal = false;
-
-      for(let i = 0; i<rows; ++i){
+      
+      //row check, changing columns
+      for(let i = 0; i<coloums; ++i){
         if(matrix[rowIndex][i] !== check)
           break;
         if(i==rows-1){
@@ -34,6 +38,7 @@ function Game() {
         }
       }
 
+      //column check, chaning row
       for(let i = 0; i<rows; ++i){
         if(matrix[i][colIndex] !== check)
           break;
@@ -42,16 +47,18 @@ function Game() {
         }
       }
 
+      //diagonal check from 0,0 to n,n
       if(rowIndex===colIndex){
-        for(let i=0, j=0; i<rows && j<rows; ++i, ++j){
+        for(let i=0, j=0; i<rows && j<coloums; ++i, ++j){
           if(matrix[i][j]!==check)
             break;
-          if(i==rows-1 && j==rows-1)
+          if(i==rows-1 && j==coloums-1)
             diagonal = true;
         }
       }
 
-      for(let i=rows-1, j=0;  i>=0 && j<rows; --i, ++j){
+      //diagonal check from n,0 to 0,n
+      for(let i=rows-1, j=0;  i>=0 && j<coloums; --i, ++j){
 
         if(matrix[i][j]!==check)
           break;
@@ -61,7 +68,7 @@ function Game() {
 
 
       
-
+      //deciding winner
       if( (row || col) || diagonal){
         setWinner(`<h1>Winner is ${check}<h1>`)
         setPlay(false);
@@ -74,18 +81,28 @@ function Game() {
 
 
 
-
+    //changing matrix size
     const handleChange = (e) =>{
 
-        setRows(Number(e.target.value))
+        console.log(history)
+
+        let change = e.target.value;
+        if(change < 3)
+          change=3;
+
+
+        if(e.target.name === "row")
+          setRows(Number(change))
+        else 
+          setColoums(Number(change))
         setIsXNext(true)
         setPlay(true)
         setWinner("")
-        setHistory([])
+        console.log(history)
     }
 
 
-
+    //Adding History to history with shallow copy of matrix
     const matrixSetup = () =>{
 
       const newMatrix = []
@@ -99,7 +116,7 @@ function Game() {
 
 
 
-
+    //assigning square required value and deleting history
     const handleClick = (rowIndex, i) =>{
 
         if(matMove < history.length){
@@ -134,6 +151,8 @@ function Game() {
 
     }
 
+
+    //Jumping to specific matrix
     const jumpTo = (step, move) =>{
 
       setMatrix(step)
@@ -147,6 +166,7 @@ function Game() {
       }
     }
 
+    //build list of moves with history data
     const moves = history.map((step, move) => {
       const desc = move ?
         'Go to move #' + move :
@@ -173,8 +193,12 @@ function Game() {
     return (
         <div className="game">
 
+          {/* Displaying winner */}
+          <h1>{winner}</h1>
+
+          {/* Color input of x and o */}
           <div className="color">
-            <label>X</label>
+          <label>X:</label>
             <input
               type="color"
               value={xColor}
@@ -182,7 +206,7 @@ function Game() {
               onChange={ e => handleColorChange(e)}
             />
 
-            <label>O</label>
+            <label>O :</label>
             <input
               type="color"
               value={oColor}
@@ -192,42 +216,62 @@ function Game() {
           </div>
 
 
-
+          {/* Display Who is next */}
           <div>
             <h1>{isXNext ? "X": "O"}</h1>
           </div>
           
+          {/* Input for dropdown  */}
           <div>
-              <input 
-                list="matrix-size"  
-                onChange={handleChange}
-                placeholder="Enter matrix size"
-              />
+              <div>
+                <input 
+                  list="row-size"  
+                  name="row"
+                  onChange={handleChange}
+                  placeholder="Enter row "
+                />
 
-              <datalist id="matrix-size">
+                <datalist id="row-size">
                   <option value="3">3</option>
                   <option value="5">5</option>
                   <option value="7">7</option>
                   <option value="21">21</option>
-              </datalist>
+                </datalist>
+              </div>
+              
+              <div>
+                <input 
+                  list="column-size"  
+                  name="column"
+                  onChange={handleChange}
+                  placeholder="Enter column"
+                />
 
+                <datalist id="column-size">
+                  <option value="3">3</option>
+                  <option value="5">5</option>
+                  <option value="7">7</option>
+                  <option value="21">21</option>
+                </datalist>
+              </div>
+              
             </div>
 
+          {/* Game Board */}
           <div className="game-board">
             <Board 
                 squares={matrix}
-                rows={rows}
                 onClick={handleClick}
                 xColor={xColor}
                 oColor={oColor}
             />
-
-            <div className="game-info">
-              <ol>{moves}</ol>
-            </div>
           </div>
 
-          <h1>{winner}</h1>
+          {/* Game Info displaying moves */}
+          <div className="game-info">
+              <ol>{moves}</ol>
+          </div>
+
         </div>
       );
 }

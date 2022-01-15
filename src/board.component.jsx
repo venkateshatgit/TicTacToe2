@@ -1,6 +1,6 @@
 import Square from "./square.component";
 
-function Board({squares, onClick, xColor, oColor}) {
+function Board({squares, onClick, xColor, oColor, rows, columns}) {
   
     function renderSquare(rowIndex, i){
 
@@ -12,15 +12,26 @@ function Board({squares, onClick, xColor, oColor}) {
               onClick={() => onClick(rowIndex, i)}
               xColor={xColor}
               oColor={oColor}
+              rows={rows}
+              columns={columns}
             />
           );
     }
 
     return (
-      <div className="board">
+      <div 
+        className="board" 
+      >
         {
           squares.map((rows, rowIndex) => (
-            <div key={rowIndex} >
+            <div 
+              className="board-row-div" 
+              key={rowIndex} 
+              style={{
+                gridTemplateColumns : `repeat(${columns}, 1fr)`, 
+                gridTemplateRows: `repeat(${rows}, 1fr)`
+              }}
+            >
               {
                   rows.map( (square, index) => renderSquare(rowIndex, index))
               }

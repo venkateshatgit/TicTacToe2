@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import InputComponents from "./components/input-components/input-components";
 import Board from "./board.component";
 
 
@@ -12,8 +13,9 @@ function Game() {
     const [history, setHistory] = useState([])
     const [stepNumber, setStepNumber] = useState(0);
     const [matMove, setMatMove] = useState(0);
-    const [xColor, setXColor] = useState('#000000');
-    const [oColor, setOColor] = useState('#000000');
+    const [winnerRatio, setWinnerRatio] = useState(0);
+    const [xColor, setXColor] = useState('#00CCFF');
+    const [oColor, setOColor] = useState('#00FF61');
   
 
 
@@ -21,22 +23,174 @@ function Game() {
         setMatrix(Array.from(Array(rows), () => new Array(coloums).fill(null)))
         setHistory([Array.from(Array(rows), () => new Array(coloums).fill(null))])
         matrixSetup()
+        setWinner("")
+        setPlay(true)
+        setIsXNext(true)
+          
         
-    }, [rows, coloums])
+    }, [rows, coloums, winnerRatio])
+
+    const horizontalCheck = (rowIndex, colIndex) =>{
+      
+      for(let i=0; i<coloums; ++i){
+        let check = 0;
+
+        for(let j=i; j<coloums; ++j){
+          if(matrix[rowIndex][j]===matrix[rowIndex][colIndex])
+            check+=1;
+          else
+            break;
+        }
+
+        if(check>=winnerRatio)
+          return true;
+      }
+
+      return false;
+    } 
+
+    const verticalCheck = (rowIndex, colIndex) =>{
+      
+      for(let i=0; i<rows; ++i){
+        let check = 0;
+
+        for(let j=i; j<rows; ++j){
+          console.log("Check", check);
+          if(matrix[j][colIndex] == matrix[rowIndex][colIndex])
+            check+=1;
+          else
+            break;
+        }
+
+        if(check>=winnerRatio)
+            return true;
+      }
+
+      return false;
+    }
+
+    const diagonalTopToBottomCheck = (rowIndex, colIndex) =>{
+      
+
+      // console.log("In check diagonal")
+      let r, c;
+      if(colIndex >= rowIndex){
+        r=0;
+        c=colIndex - rowIndex;
+      }
+      else{
+        c=0;
+        r=rowIndex-colIndex;
+      }
+
+      console.log("In check diagonal", r, c)
+
+      for(let i=r, j=c; i<rows && j<coloums; ++i, ++j){
+        let check = 0;
+
+        
+        for(let p=i, q=j; p<rows && q<coloums; ++p, ++q){
+
+          // console.log(`Checking ${p} ${q}`)
+          if(matrix[p][q] === matrix[rowIndex][colIndex])
+            check+=1;
+          else
+            break;
+        }
+
+        if(check >= winnerRatio)
+          return true;
+      }
+
+      return false;
+
+    }
+
+    const checkUp = (rowIndex, colIndex, check) => {
+
+      
+      if(rowIndex<0 || colIndex>=coloums || matrix[rowIndex][colIndex]!==check )
+        return 0;
+      
+      //console.log(matrix[rowIndex][colIndex], rowIndex, colIndex)
+      
+      let x = checkUp(rowIndex-1, colIndex+1, check) + 1;
+
+      return x;
+    }
+
+    const checkDown = (rowIndex, colIndex, check) => {
+
+      if(rowIndex>=rows || colIndex<0 || matrix[rowIndex][colIndex]!==check )
+        return 0;
+      
+      let x = checkDown(rowIndex+1, colIndex-1, check) + 1;
+
+      return x;
+    }
+
+    const diagonalBottomToTopCheck = (rowIndex, colIndex) => {
+
+      let up  = checkUp(rowIndex-1, colIndex+1, matrix[rowIndex][colIndex]);
+      let down = checkDown(rowIndex+1, colIndex-1, matrix[rowIndex][colIndex]);
+
+      // console.log("Up", up, "Down", down);
+      if(up+down+1 >= winnerRatio)
+        return true;
+
+      console.log("Up", up)
+      
+      return false;
+    }
+
+    const checkWinner = (row, col, diagonalTB, diagonalBT, check) =>{
+
+      console.log(check)
+
+      if( row===true || col===true || diagonalTB===true || diagonalBT===true){
+        setWinner(`Winner is ${check}`)
+        setPlay(false);
+      }
+
+    }
+
+    const dynamicWinner = (rowIndex, colIndex, check) => {
+
+      
+      const row = horizontalCheck(rowIndex, colIndex);
+      const col = verticalCheck(rowIndex, colIndex);
+      const diagonalTB = diagonalTopToBottomCheck(rowIndex, colIndex);
+      const diagonalBT = diagonalBottomToTopCheck(rowIndex, colIndex);
+
+      console.log( rowIndex, colIndex)
+
+      checkWinner(row, col, diagonalTB, diagonalBT, check)
+    }
 
 
     const calculateWinner = (rowIndex, colIndex) => {
-      let check = matrix[rowIndex][colIndex]
+      
       let row = false, col = false, diagonal = false;
+      const check = matrix[rowIndex][colIndex];
+
+      if(winnerRatio>1 && winnerRatio<=rows && winnerRatio<=coloums){
+        dynamicWinner(rowIndex, colIndex, check);
+        return;
+      }
+
+
+      
+      
       
       //row check, changing columns
       for(let i = 0; i<coloums; ++i){
         if(matrix[rowIndex][i] !== check)
           break;
-        if(i==rows-1){
+        if(i==coloums-1){
           row = true;
         }
       }
+      
 
       //column check, chaning row
       for(let i = 0; i<rows; ++i){
@@ -67,12 +221,11 @@ function Game() {
       }
 
 
+      // console.log(row, col, diagonal, check)
       
       //deciding winner
-      if( (row || col) || diagonal){
-        setWinner(`<h1>Winner is ${check}<h1>`)
-        setPlay(false);
-      }
+      checkWinner(row, col, diagonal, false, check)
+
     }
 
 
@@ -84,7 +237,7 @@ function Game() {
     //changing matrix size
     const handleChange = (e) =>{
 
-        console.log(history)
+        //console.log(history)
 
         let change = e.target.value;
         if(change < 3)
@@ -98,7 +251,7 @@ function Game() {
         setIsXNext(true)
         setPlay(true)
         setWinner("")
-        console.log(history)
+        // console.log(history)
     }
 
 
@@ -174,7 +327,11 @@ function Game() {
 
       return (
         <li key={move}>
-          <button 
+          <button
+            className="btn"
+            style={{
+              backgroundColor: `${move%2===0 ? oColor : xColor}`
+            }}
             onClick={() => jumpTo(step, move)}
           >{desc}</button>
         </li>
@@ -191,20 +348,33 @@ function Game() {
 
     
     return (
+      <div className="game-container">
+
+        <h1 
+          className={winner.length ? 'zoom-in-out-box': ""}
+          style={{
+            color: 
+            `${winner.length ? 
+              ((isXNext) ? oColor: xColor) : "#fff"}`
+          }}
+        >
+          {winner.length ? winner : "Tic Tac Toe" }
+        </h1>
         <div className="game">
 
-          {/* Displaying winner */}
-          <h1>{winner}</h1>
-
+        <div className="left-div panel">
           {/* Color input of x and o */}
-          <div className="color">
-          <label>X:</label>
-            <input
-              type="color"
-              value={xColor}
-              name="x"
-              onChange={ e => handleColorChange(e)}
-            />
+          <div className="color" style={{color: "#fff", fontSize: "20px"}}>
+            
+
+            <InputComponents 
+                  label={"X"} 
+                  type={"color"}
+                  value={xColor}
+                  name={"x"}
+                  onColorChange={handleColorChange}
+            /> 
+           
 
             <label>O :</label>
             <input
@@ -213,66 +383,104 @@ function Game() {
               name="o"
               onChange={ e => handleColorChange(e)}
             />
+
+
+            {/* <InputComponent 
+                  label={"lableName"} 
+                  type={"color"}
+                  value={xColor}
+                  name={"x"}
+                  OnColorChange={handleColorChange}
+                /> 
+            */}
+
           </div>
 
 
           {/* Display Who is next */}
           <div>
-            <h1>{isXNext ? "X": "O"}</h1>
+            <h1 style={{color: "#fff"}}>
+              Next player: 
+              <span 
+                style={{
+                  color: `${isXNext ? xColor: oColor}`}}
+              >
+                {isXNext ? " X ": " O "}
+              </span> 
+            </h1>
           </div>
-          
+
           {/* Input for dropdown  */}
           <div>
-              <div>
+              <div className="mat-inputs">
+                <label>Rows: </label>
                 <input 
                   list="row-size"  
                   name="row"
+                  type="number"
                   onChange={handleChange}
                   placeholder="Enter row "
                 />
-
-                <datalist id="row-size">
-                  <option value="3">3</option>
-                  <option value="5">5</option>
-                  <option value="7">7</option>
-                  <option value="21">21</option>
-                </datalist>
               </div>
               
-              <div>
+              <div className="mat-inputs">
+                <label>Columns: </label>
                 <input 
                   list="column-size"  
                   name="column"
+                  type="number"
                   onChange={handleChange}
                   placeholder="Enter column"
                 />
+              </div>
 
-                <datalist id="column-size">
-                  <option value="3">3</option>
-                  <option value="5">5</option>
-                  <option value="7">7</option>
-                  <option value="21">21</option>
-                </datalist>
+              {/* Input for winner ratio */}
+              <div className="mat-inputs">
+              <label>Winner Ratio: </label>
+                <input  
+                  type="Number" 
+                  onChange ={ e => setWinnerRatio(Number(e.target.value))}
+                />
               </div>
               
             </div>
 
-          {/* Game Board */}
-          <div className="game-board">
+          <div>
+              <button  className="reset-btn" onClick={() => {window.location.reload()}}>Reset</button>
+          </div>
+        </div>
+
+        <div 
+          className="middle-div panel matrix"
+          style={{
+            backgroundColor: `${isXNext ? xColor: oColor}`
+
+          }}
+        >
+            {/* Game Board */}
             <Board 
                 squares={matrix}
                 onClick={handleClick}
                 xColor={xColor}
                 oColor={oColor}
+                rows={rows}
+                columns={coloums}
             />
-          </div>
+        </div>
 
+        <div className="right-div panel">
           {/* Game Info displaying moves */}
           <div className="game-info">
-              <ol>{moves}</ol>
+              <ul>{moves}</ul>
           </div>
+        </div>
+
+
+
 
         </div>
+      </div>
+     
       );
 }
 

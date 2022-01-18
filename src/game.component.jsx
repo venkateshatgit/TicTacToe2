@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import InputComponents from "./components/input-components/input-components";
-import Board from "./board.component";
+import Header from "./header";
+import RightDivPanel from "./components/right.component/right-div-panel.component";
+import MiddleDivPanel from "./components/middle.component/middle-div-panel";
+import Reset from "./components/reset.component/reset.component";
+import WhoIsNext from "./components/who-is-next.component/who-is-next.component";
 
 
 function Game() {
@@ -26,8 +30,6 @@ function Game() {
         setWinner("")
         setPlay(true)
         setIsXNext(true)
-          
-        
     }, [rows, coloums, winnerRatio])
 
     const horizontalCheck = (rowIndex, colIndex) =>{
@@ -55,7 +57,6 @@ function Game() {
         let check = 0;
 
         for(let j=i; j<rows; ++j){
-          console.log("Check", check);
           if(matrix[j][colIndex] == matrix[rowIndex][colIndex])
             check+=1;
           else
@@ -145,7 +146,6 @@ function Game() {
 
     const checkWinner = (row, col, diagonalTB, diagonalBT, check) =>{
 
-      console.log(check)
 
       if( row===true || col===true || diagonalTB===true || diagonalBT===true){
         setWinner(`Winner is ${check}`)
@@ -347,137 +347,100 @@ function Game() {
     }
 
     
-    return (
+  return (
       <div className="game-container">
+        
+        <Header 
+          winner={winner} 
+          isXNext={isXNext} 
+          oColor={oColor}
+          xColor={xColor}
+        />
 
-        <h1 
-          className={winner.length ? 'zoom-in-out-box': ""}
-          style={{
-            color: 
-            `${winner.length ? 
-              ((isXNext) ? oColor: xColor) : "#fff"}`
-          }}
-        >
-          {winner.length ? winner : "Tic Tac Toe" }
-        </h1>
+
         <div className="game">
 
-        <div className="left-div panel">
-          {/* Color input of x and o */}
-          <div className="color" style={{color: "#fff", fontSize: "20px"}}>
+          <div className="left-div panel">
+            {/* Color input of x and o */}
+            <div className="color" style={{color: "#fff", fontSize: "20px"}}>
+
+              <InputComponents 
+                    label={"X"} 
+                    type={"color"}
+                    value={xColor}
+                    name={"x"}
+                    onChange={handleColorChange}
+              /> 
+
+              <InputComponents 
+                    label={"O"} 
+                    type={"color"}
+                    value={oColor}
+                    name={"o"}
+                    onChange={handleColorChange}
+              /> 
             
+            </div>
 
-            <InputComponents 
-                  label={"X"} 
-                  type={"color"}
-                  value={xColor}
-                  name={"x"}
-                  onColorChange={handleColorChange}
-            /> 
-           
 
-            <label>O :</label>
-            <input
-              type="color"
-              value={oColor}
-              name="o"
-              onChange={ e => handleColorChange(e)}
+            {/* Display Who is next */}
+
+            <WhoIsNext 
+                isXNext={isXNext}
+                xColor={xColor}
+                oColor={oColor}
             />
 
+            {/* Input for dropdown  */}
+            <div>
 
-            {/* <InputComponent 
-                  label={"lableName"} 
-                  type={"color"}
-                  value={xColor}
-                  name={"x"}
-                  OnColorChange={handleColorChange}
-                /> 
-            */}
-
-          </div>
-
-
-          {/* Display Who is next */}
-          <div>
-            <h1 style={{color: "#fff"}}>
-              Next player: 
-              <span 
-                style={{
-                  color: `${isXNext ? xColor: oColor}`}}
-              >
-                {isXNext ? " X ": " O "}
-              </span> 
-            </h1>
-          </div>
-
-          {/* Input for dropdown  */}
-          <div>
-              <div className="mat-inputs">
-                <label>Rows: </label>
-                <input 
-                  list="row-size"  
-                  name="row"
-                  type="number"
+              <InputComponents 
+                  name={"row"}
+                  label={"Rows : "}
+                  type={"number"}
                   onChange={handleChange}
-                  placeholder="Enter row "
-                />
-              </div>
-              
-              <div className="mat-inputs">
-                <label>Columns: </label>
-                <input 
-                  list="column-size"  
-                  name="column"
-                  type="number"
-                  onChange={handleChange}
-                  placeholder="Enter column"
-                />
-              </div>
+                  placeholder={"Enter row"}
+                  className={"mat-inputs"}
+              />
 
+              <InputComponents 
+                  name={"column"}
+                  label={"Coloums : "}
+                  type={"number"}
+                  onChange={handleChange}
+                  placeholder={"Enter columns "}
+                  className={"mat-inputs"}
+              />
+
+            
               {/* Input for winner ratio */}
-              <div className="mat-inputs">
-              <label>Winner Ratio: </label>
-                <input  
-                  type="Number" 
-                  onChange ={ e => setWinnerRatio(Number(e.target.value))}
-                />
-              </div>
+              <InputComponents 
+                  label={"Winner Ratio : "}
+                  type={"number"}
+                  onChange = {e => setWinnerRatio(Number(e.target.value))}
+                  className={"mat-inputs"}
+
+              />
               
             </div>
 
-          <div>
-              <button  className="reset-btn" onClick={() => {window.location.reload()}}>Reset</button>
+            <Reset />
+
           </div>
-        </div>
 
-        <div 
-          className="middle-div panel matrix"
-          style={{
-            backgroundColor: `${isXNext ? xColor: oColor}`
+          
+          <MiddleDivPanel 
+            matrix={matrix}
+            handleClick={handleClick}
+            isXNext={isXNext} 
+            xColor={xColor} 
+            oColor={oColor}
+            row={rows}
+            coloums={coloums}
+          />
 
-          }}
-        >
-            {/* Game Board */}
-            <Board 
-                squares={matrix}
-                onClick={handleClick}
-                xColor={xColor}
-                oColor={oColor}
-                rows={rows}
-                columns={coloums}
-            />
-        </div>
-
-        <div className="right-div panel">
-          {/* Game Info displaying moves */}
-          <div className="game-info">
-              <ul>{moves}</ul>
-          </div>
-        </div>
-
-
-
-
+          <RightDivPanel  moves ={moves}/>
+          
         </div>
       </div>
      

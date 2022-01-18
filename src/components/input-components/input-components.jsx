@@ -1,13 +1,16 @@
 function InputComponents({label, ...inputProperties}) {
     return (  
-        <div>
+        <div className={`${inputProperties.className}`} >
+
             <label>{label}</label>
             <input
               type={`${inputProperties.type}`}
               value={inputProperties.value}
               name={`${inputProperties.name}`}
-              onChange={ e =>  inputProperties.onColorChange(e)}
+              onChange={ e =>  inputProperties.onChange(e)}
+              placeholder={inputProperties.placeholder}
             />
+            
         </div>
     );
 }

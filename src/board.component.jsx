@@ -1,4 +1,4 @@
-import Square from "./square.component";
+import Square from "./components/square.component/square.component";
 
 function Board({squares, onClick, xColor, oColor, rows, columns}) {
   

@@ -1,4 +1,9 @@
-function Square({value, onClick, xColor, oColor, rows, columns}) {
+import { useSelector } from "react-redux";
+
+function Square({value, onClick}) {
+
+  const {xColor, oColor} = useSelector((state) => state.game)
+
     return (
       <button 
         className="square" 

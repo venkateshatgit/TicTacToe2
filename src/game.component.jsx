@@ -5,11 +5,18 @@ import RightDivPanel from "./components/right.component/right-div-panel.componen
 import MiddleDivPanel from "./components/middle.component/middle-div-panel";
 import Reset from "./components/reset.component/reset.component";
 import WhoIsNext from "./components/who-is-next.component/who-is-next.component";
+import {useSelector, useDispatch} from 'react-redux';
+import { onChangeRow, onChangeColoum, onChangeWinnerRatio, onChangeOColor, onChangeXColor } from "./redux/game-state/gameSlice";
+
+
 
 
 function Game() {
-    const [rows, setRows] = useState(3)
-    const [coloums, setColoums] = useState(3) 
+
+
+    const  dispatch = useDispatch()
+    const {rows, coloums, winnerRatio, xColor, oColor} = useSelector((state) => state.game)
+    
     const [matrix, setMatrix] = useState(Array.from(Array(rows), () => new Array(coloums).fill(null)))
     const [isXNext, setIsXNext] = useState(true)
     const [winner, setWinner] = useState("")
@@ -17,9 +24,7 @@ function Game() {
     const [history, setHistory] = useState([])
     const [stepNumber, setStepNumber] = useState(0);
     const [matMove, setMatMove] = useState(0);
-    const [winnerRatio, setWinnerRatio] = useState(0);
-    const [xColor, setXColor] = useState('#00CCFF');
-    const [oColor, setOColor] = useState('#00FF61');
+
   
 
 
@@ -31,6 +36,29 @@ function Game() {
         setPlay(true)
         setIsXNext(true)
     }, [rows, coloums, winnerRatio])
+
+
+        //changing matrix size
+    const handleChange = (e) =>{
+
+        //console.log(history)
+
+        let change = e.target.value;
+        if(change < 3)
+          change=3;
+
+
+        if(e.target.name === "row")
+          dispatch(onChangeRow(Number(change)))
+        else
+          dispatch(onChangeColoum(Number(change)))
+
+
+        setIsXNext(true)
+        setPlay(true)
+        setWinner("")
+        // console.log(history)
+    }
 
     const horizontalCheck = (rowIndex, colIndex) =>{
       
@@ -234,25 +262,7 @@ function Game() {
 
 
 
-    //changing matrix size
-    const handleChange = (e) =>{
 
-        //console.log(history)
-
-        let change = e.target.value;
-        if(change < 3)
-          change=3;
-
-
-        if(e.target.name === "row")
-          setRows(Number(change))
-        else 
-          setColoums(Number(change))
-        setIsXNext(true)
-        setPlay(true)
-        setWinner("")
-        // console.log(history)
-    }
 
 
     //Adding History to history with shallow copy of matrix
@@ -341,9 +351,9 @@ function Game() {
     const handleColorChange = e =>{
       
       if(e.target.name==="x")
-        setXColor(e.target.value);
+        dispatch(onChangeXColor(e.target.value));
       else
-        setOColor(e.target.value)
+        dispatch(onChangeOColor(e.target.value));
     }
 
     
@@ -417,7 +427,7 @@ function Game() {
               <InputComponents 
                   label={"Winner Ratio : "}
                   type={"number"}
-                  onChange = {e => setWinnerRatio(Number(e.target.value))}
+                  onChange = {e => dispatch(onChangeWinnerRatio(Number(e.target.value)))}
                   className={"mat-inputs"}
 
               />
@@ -433,10 +443,6 @@ function Game() {
             matrix={matrix}
             handleClick={handleClick}
             isXNext={isXNext} 
-            xColor={xColor} 
-            oColor={oColor}
-            row={rows}
-            coloums={coloums}
           />
 
           <RightDivPanel  moves ={moves}/>

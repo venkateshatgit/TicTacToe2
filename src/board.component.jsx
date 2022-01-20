@@ -1,6 +1,9 @@
+import { useSelector } from "react-redux";
 import Square from "./components/square.component/square.component";
 
-function Board({squares, onClick, xColor, oColor, rows, columns}) {
+
+
+function Board({squares, onClick}) {
   
     function renderSquare(rowIndex, i){
 
@@ -10,15 +13,14 @@ function Board({squares, onClick, xColor, oColor, rows, columns}) {
               key={rowIndex, i}
               value={squares[rowIndex][i]}
               onClick={() => onClick(rowIndex, i)}
-              xColor={xColor}
-              oColor={oColor}
-              rows={rows}
-              columns={columns}
             />
           );
     }
 
+    const {coloums, rows} = useSelector((state) => state.game)
+
     return (
+
       <div 
         className="board" 
       >
@@ -28,7 +30,7 @@ function Board({squares, onClick, xColor, oColor, rows, columns}) {
               className="board-row-div" 
               key={rowIndex} 
               style={{
-                gridTemplateColumns : `repeat(${columns}, 1fr)`, 
+                gridTemplateColumns : `repeat(${coloums}, 1fr)`, 
                 gridTemplateRows: `repeat(${rows}, 1fr)`
               }}
             >

@@ -1,5 +1,7 @@
 # React Doc Tic Tac Toe App
 
+Access site here [Tic-Tac-Toe-v2](https://tic-tac-toe-v2-acf8c0.netlify.app/)
+
 This website is extended version of React documentation [tutorial](https://react.dev/learn/tutorial-tic-tac-toe).
 
 ## Additional features

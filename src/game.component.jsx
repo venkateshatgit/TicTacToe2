@@ -16,7 +16,7 @@ function Game() {
 
     const  dispatch = useDispatch()
     const {rows, coloums, winnerRatio, xColor, oColor} = useSelector((state) => state.game)
-    
+
     const [matrix, setMatrix] = useState(Array.from(Array(rows), () => new Array(coloums).fill(null)))
     const [isXNext, setIsXNext] = useState(true)
     const [winner, setWinner] = useState("")
@@ -24,9 +24,6 @@ function Game() {
     const [history, setHistory] = useState([])
     const [stepNumber, setStepNumber] = useState(0);
     const [matMove, setMatMove] = useState(0);
-
-  
-
 
     useEffect(() => {
         setMatrix(Array.from(Array(rows), () => new Array(coloums).fill(null)))
@@ -258,13 +255,6 @@ function Game() {
 
 
 
-
-
-
-
-
-
-
     //Adding History to history with shallow copy of matrix
     const matrixSetup = () =>{
 
@@ -397,8 +387,6 @@ function Game() {
 
             <WhoIsNext 
                 isXNext={isXNext}
-                xColor={xColor}
-                oColor={oColor}
             />
 
             {/* Input for dropdown  */}

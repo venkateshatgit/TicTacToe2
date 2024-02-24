@@ -8,6 +8,7 @@ This website is extended version of React documentation [tutorial](https://react
 - Can adjust number of rows and columns.
 - Can adjust winner ratio (default value is equal to number of row or column, which ever player makes first) 
 - Color coding for 'X' and 'O'
+- Preview all the moves
 - Can go back to all previous steps and begin from there.
 
 #### How the default version looks
